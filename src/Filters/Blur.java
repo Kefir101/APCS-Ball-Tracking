@@ -18,7 +18,7 @@ public class Blur implements PixelFilter {
         int kernelSize = Integer.parseInt(JOptionPane.showInputDialog(null, "what size kernel (odd only)"));
 
         double[][]kernel = new double[kernelSize][kernelSize];
-        createBoxBlur(kernel);
+        createGaussianBlur(kernel);
         double weightsSum = calculateSum(kernel);
         for (int r = 0; r < red.length; r++) {
             for (int c = 0; c < red[0].length; c++) {

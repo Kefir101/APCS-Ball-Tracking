@@ -8,8 +8,44 @@ import javax.swing.*;
 public class BlurAndThreshold implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
-        return threshold(blur(img));
+        return outline(threshold(blur(img)), img);
     }
+
+    private DImage outline(DImage img, DImage original) {
+        short[][][] out = {original.getRedChannel(), original.getGreenChannel(), original.getBlueChannel()};
+        int maxX = 0, maxY = 0, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
+        short[][]BWimg = img.getBWPixelGrid();
+        for (int r = 0; r < img.getHeight(); r++) {
+            for (int c = 0; c < img.getWidth(); c++) {
+                if (BWimg[r][c] == 255) {
+                    if (r > maxY) maxY = r;
+                    if(r < minY) minY = r;
+                    if (c > maxX) maxX= c;
+                    if (c < minX) minX = c;
+                }
+            }
+        }
+        for (int i = minX; i <= maxX; i++) {
+            out[0][minY][i] = 0;
+            out[1][minY][i] = 150;
+            out[2][minY][i] = 150;
+            out[0][maxY][i] = 0;
+            out[1][maxY][i] = 150;
+            out[2][maxY][i] = 150;
+        }
+        for (int i = minY; i <= maxY; i++) {
+            out[0][i][minX] = 0;
+            out[1][i][minX] = 150;
+            out[2][i][minX] = 150;
+            out[0][i][maxX] = 0;
+            out[1][i][maxX] = 150;
+            out[2][i][maxX] = 150;
+        }
+        original.setColorChannels(out[0], out[1], out[2]);
+        return original;
+
+    }
+
     public DImage threshold(DImage img) {
         int height = img.getRedChannel().length;
         int width = img.getRedChannel()[0].length;
@@ -20,7 +56,7 @@ public class BlurAndThreshold implements PixelFilter {
                 int red = in[0][r][c];
                 int green = in[1][r][c];
                 int blue = in[2][r][c];
-                if (red > 2 * green && red > 2 * blue) out[r][c] = 255;
+                if (red > 2.7 * green && red > 2.7 * blue) out[r][c] = 255;
             }
         }
         DImage outImg = new DImage(width, height);
