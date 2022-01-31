@@ -2,9 +2,8 @@ import core.DisplayWindow;
 
 public class RunMe {
     public static void main(String[] args) {
-        int a= 1;
         // --== Load an image to filter ==--
-        DisplayWindow.showFor("images/6.jpg", 800, 600);
+        DisplayWindow.showFor("images/red.jpg", 800, 600);
 
         // --== Determine your input interactively with menus ==--
         //DisplayWindow.getInputInteractively(800,600);
