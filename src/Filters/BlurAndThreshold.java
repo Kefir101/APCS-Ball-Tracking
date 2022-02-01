@@ -3,49 +3,48 @@ package Filters;
 import Interfaces.PixelFilter;
 import core.DImage;
 
-import javax.swing.*;
-
 public class BlurAndThreshold implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
-        return outline(threshold(blur(img)), img);
+        return outline(img, threshold(blur(img)));
     }
-
-    private DImage outline(DImage img, DImage original) {
+    private DImage outline(DImage original, DImage img) {
         short[][][] out = {original.getRedChannel(), original.getGreenChannel(), original.getBlueChannel()};
         int maxX = 0, maxY = 0, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
-        short[][]BWimg = img.getBWPixelGrid();
+        short[][] bwImg = img.getBWPixelGrid();
+        System.out.println(out[0].length + " " + bwImg.length);
+        System.out.println(out[0][0].length + " " + bwImg[0].length);
         for (int r = 0; r < img.getHeight(); r++) {
             for (int c = 0; c < img.getWidth(); c++) {
-                if (BWimg[r][c] == 255) {
+                if (bwImg[r][c] == 255) {
                     if (r > maxY) maxY = r;
-                    if(r < minY) minY = r;
+                    if (r < minY) minY = r;
                     if (c > maxX) maxX= c;
                     if (c < minX) minX = c;
                 }
             }
         }
         for (int i = minX; i <= maxX; i++) {
-            out[0][minY][i] = 0;
-            out[1][minY][i] = 150;
-            out[2][minY][i] = 150;
-            out[0][maxY][i] = 0;
-            out[1][maxY][i] = 150;
-            out[2][maxY][i] = 150;
+            out[0][minY][i] = 255;
+            out[1][minY][i] = 255;
+            out[2][minY][i] = 0;
+
+            out[0][maxY][i] = 255;
+            out[1][maxY][i] = 255;
+            out[2][maxY][i] = 0;
         }
         for (int i = minY; i <= maxY; i++) {
-            out[0][i][minX] = 0;
-            out[1][i][minX] = 150;
-            out[2][i][minX] = 150;
-            out[0][i][maxX] = 0;
-            out[1][i][maxX] = 150;
-            out[2][i][maxX] = 150;
+            out[0][i][minX] = 255;
+            out[1][i][minX] = 255;
+            out[2][i][minX] = 0;
+
+            out[0][i][maxX] = 255;
+            out[1][i][maxX] = 255;
+            out[2][i][maxX] = 0;
         }
         original.setColorChannels(out[0], out[1], out[2]);
         return original;
-
     }
-
     public DImage threshold(DImage img) {
         int height = img.getRedChannel().length;
         int width = img.getRedChannel()[0].length;
@@ -63,27 +62,28 @@ public class BlurAndThreshold implements PixelFilter {
         outImg.setPixels(out);
         return outImg;
     }
-    public DImage blur(DImage img) {
-        int height = img.getRedChannel().length;
-        int width = img.getRedChannel()[0].length;
-        short[][][] in = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
-        short[][][] out = new short[3][height][width];
-
-        int kernelSize = Integer.parseInt(JOptionPane.showInputDialog(null, "Kernel Size (odd only): "));
+    public DImage blur(DImage in) {
+        int height = in.getRedChannel().length;
+        int width = in.getRedChannel()[0].length;
+        short[][][] inColors = {in.getRedChannel(), in.getGreenChannel(), in.getBlueChannel()};
+        short[][][] outColors = new short[3][height][width];
+//        int kernelSize = Integer.parseInt(JOptionPane.showInputDialog(null, "Kernel Size (odd only): "));
+        int kernelSize = 15;
         double[][] kernel = new double[kernelSize][kernelSize];
         createBoxBlur(kernel);
         double weightsSum = calculateSum(kernel);
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 if (!(r < kernelSize / 2 || c < kernelSize / 2 || r >= height - kernelSize / 2 || c >= width - kernelSize / 2)) {
-                    out[0][r][c] = (short) ComputeOutputValue(r, c, in[0], kernel, weightsSum);
-                    out[1][r][c] = (short) ComputeOutputValue(r, c, in[1], kernel, weightsSum);
-                    out[2][r][c] = (short) ComputeOutputValue(r, c, in[2], kernel, weightsSum);
+                    outColors[0][r][c] = (short) computeOutputValue(r, c, inColors[0], kernel, weightsSum);
+                    outColors[1][r][c] = (short) computeOutputValue(r, c, inColors[1], kernel, weightsSum);
+                    outColors[2][r][c] = (short) computeOutputValue(r, c, inColors[2], kernel, weightsSum);
                 }
             }
         }
-        img.setColorChannels(out[0], out[1], out[2]);
-        return img;
+        DImage out = new DImage(width, height);
+        out.setColorChannels(outColors[0], outColors[1], outColors[2]);
+        return out;
     }
     private void createBoxBlur(double[][] kernel) {
         for (int r = 0; r < kernel.length; r++) {
@@ -92,7 +92,7 @@ public class BlurAndThreshold implements PixelFilter {
             }
         }
     }
-    private double ComputeOutputValue(int r, int c, short[][] pixels, double[][] kernel, double kernelSum) {
+    private double computeOutputValue(int r, int c, short[][] pixels, double[][] kernel, double kernelSum) {
         double output = 0;
         int half = kernel.length / 2;
         for (int i = -half; i < half + 1; i++) {
@@ -100,9 +100,7 @@ public class BlurAndThreshold implements PixelFilter {
                 output += pixels[r + i][c + j] * kernel[i + half][j + half];
             }
         }
-        if (kernelSum != 0) {
-            output = output / kernelSum;
-        }
+        if (kernelSum != 0) output = output / kernelSum;
         if (output < 0) output = 0;
         if (output > 255) output = 255;
         return output;
@@ -119,9 +117,11 @@ public class BlurAndThreshold implements PixelFilter {
     private void createGaussianBlur(double[][] kernel) {
         int half = kernel.length / 2;
         double stdv = 3;
+        double a = (1 / (2 * Math.PI * stdv * stdv)) * Math.E;
+        double b = (2 * stdv * stdv);
         for (int r = -half; r <= half; r++) {
             for (int c = -half; c <= half; c++) {
-                double weight = Math.pow((1 / (2 * Math.PI * stdv * stdv)) * Math.exp(1), -((r * r) + (c * c)) / (2 * stdv * stdv));
+                double weight = Math.pow(a, -((r * r) + (c * c)) / b);
                 kernel[r + half][c + half] = weight;
             }
         }
