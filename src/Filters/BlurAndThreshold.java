@@ -6,7 +6,7 @@ import core.DImage;
 public class BlurAndThreshold implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
-        return outline(img, threshold(blur(img)));
+        return threshold(blur(img));
     }
     private DImage outline(DImage original, DImage img) {
         short[][][] out = {original.getRedChannel(), original.getGreenChannel(), original.getBlueChannel()};
@@ -52,10 +52,13 @@ public class BlurAndThreshold implements PixelFilter {
         short[][] out = new short[height][width];
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
-                int red = in[0][r][c];
-                int green = in[1][r][c];
-                int blue = in[2][r][c];
-                if (red > 2.7 * green && red > 2.7 * blue) out[r][c] = 255;
+                int[] rgb = {in[0][r][c], in[1][r][c], in[2][r][c]};
+                boolean red = rgb[0] > 2.7 * rgb[1] && rgb[0] > 2.7 * rgb[2];
+                boolean orange = rgb[0] > 2.7 * rgb[2] && rgb[1] > 2.7 * rgb[2] && rgb[0] > rgb[1]*1.3;
+                boolean yellow = rgb[0] > 2.7 * rgb[2] && rgb[1] > 2.7 * rgb[2];
+                boolean green = rgb[1] > 2.7 * rgb[0] && rgb[1] > 2.7 * rgb[2];
+                boolean blue = rgb[2] > 2.7 * rgb[0] && rgb[2] > 2.7 * rgb[1];
+                if (red || orange || yellow || green || blue) out[r][c] = 255;
             }
         }
         DImage outImg = new DImage(width, height);
