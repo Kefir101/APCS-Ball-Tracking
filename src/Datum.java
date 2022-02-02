@@ -1,0 +1,20 @@
+import processing.core.PVector;
+
+import static processing.core.PApplet.dist;
+import static processing.core.PApplet.hex;
+
+public class Datum {
+    PVector pos;
+    int color, cluster = 0;
+    public Datum(PVector pos_, int color_){
+        this.pos = pos_;
+        this.color = color_;
+    }
+    float distanceToMouse(float mouseX, float mouseY){
+        return dist(mouseX, mouseY, pos.x, pos.y);
+    }
+    @Override
+    public String toString() {
+        return (hex(this.color));
+    }
+}
