@@ -1,17 +1,19 @@
+package Kmeans;
+
 import processing.core.PVector;
 
 import static processing.core.PApplet.dist;
 import static processing.core.PApplet.hex;
 
 public class Datum {
-    PVector pos;
+    Location pos;
     int color, cluster = 0;
-    public Datum(PVector pos_, int color_){
+    public Datum(Location pos_, int color_){
         this.pos = pos_;
         this.color = color_;
     }
     float distanceToMouse(float mouseX, float mouseY){
-        return dist(mouseX, mouseY, pos.x, pos.y);
+        return dist(mouseX, mouseY, pos.getx(), pos.gety());
     }
     @Override
     public String toString() {
