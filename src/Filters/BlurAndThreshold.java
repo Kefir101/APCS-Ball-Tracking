@@ -1,42 +1,35 @@
 package Filters;
 
 import Interfaces.PixelFilter;
-import Kmeans.FindBalls;
-import Kmeans.Location;
+import KMeans.FindBalls;
+import KMeans.Point;
 import core.DImage;
-import processing.core.PVector;
 
 import java.util.ArrayList;
 
 public class BlurAndThreshold implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
-        FindBalls kmeans = new FindBalls(threshold(blur(img)),4);
-        ArrayList<Location> balls = kmeans.findBalls();
+        FindBalls findBalls = new FindBalls(threshold(blur(img)),4);
+        ArrayList<Point> balls = findBalls.findBalls();
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
-        for (int i = 0; i < balls.size(); i++) {
-            Location v1 = balls.get(i);
-
-
-        }
-            //int r = Integer.valueOf( ball.y);
-            //int c = (int) ball.x;
-            //System.out.println(ball.y + "\t" + ball.x);
-            /*
+        for (int b = 1; b < balls.size(); b++) {
+            Point point = balls.get(b);
+            int x = point.x;
+            int y = point.y;
             for (int i = -2; i <= 2; i++) {
                 for (int j = -2; j <= 2; j++) {
-                    if (isInBounds(img.getHeight(), img.getWidth(), r+i, c+j)) {
-                        out[0][r+i][c+j] = 0;
-                        out[1][r+i][c+j] = 0;
-                        out[2][r+i][c+j] = 0;
+                    int r = y + i;
+                    int c = x + j;
+                    if (isInBounds(img.getHeight(), img.getWidth(), r, c)) {
+                        out[0][r][c] = 0;
+                        out[1][r][c] = 0;
+                        out[2][r][c] = 0;
                     }
                 }
             }
-
-             */
-
+        }
         img.setColorChannels(out[0],out[1], out[2]);
-
         return img;
     }
     private DImage outline(DImage original, DImage img) {
@@ -126,7 +119,6 @@ public class BlurAndThreshold implements PixelFilter {
             }
         }
     }
-
     private boolean isInBounds(int height, int width, int r, int c){
         if (r<0 || c <0 || r >=height || c >=width) return false;
         return true;
