@@ -92,6 +92,6 @@ public class FindBalls extends PApplet {
         }
     }
     public static void main(String[] args) {
-        PApplet.main("FindBalls");
+        PApplet.main("KMeans.FindBalls");
     }
 }

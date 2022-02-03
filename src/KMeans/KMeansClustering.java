@@ -17,7 +17,6 @@ public class KMeansClustering extends PApplet{
     ArrayList<Datum> dataList = randomDatumList(numberOfDataPoints, 255);
     ArrayList<Integer> clusterColorList = new ArrayList<>(Arrays.asList(0, color(255, 0, 0), color(0, 255, 0), color(0, 0, 255), color(255, 255, 0)));
     ArrayList<PVector> clusterList = new ArrayList(Collections.nCopies(K+1, 0));
-
     public void settings() {
         size((int) width, (int) height);
     }
@@ -104,7 +103,6 @@ public class KMeansClustering extends PApplet{
         }
     }
     public static void main(String[] args) {
-        PApplet.main("Kmeans.KMeansClustering");
+        PApplet.main("KMeans.KMeansClustering");
     }
-
 }
