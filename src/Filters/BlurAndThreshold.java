@@ -6,17 +6,20 @@ import KMeans.Point;
 import core.DImage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BlurAndThreshold implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
+        DImage iiii = threshold(blur(img));
+        System.out.println(Arrays.deepToString(iiii.getBWPixelGrid()));
         FindBalls findBalls = new FindBalls(threshold(blur(img)),4);
         ArrayList<Point> balls = findBalls.findBalls();
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         for (int b = 1; b < balls.size(); b++) {
             Point point = balls.get(b);
-            int x = point.x;
-            int y = point.y;
+            int x = (int) point.x;
+            int y = (int) point.y;
             for (int i = -2; i <= 2; i++) {
                 for (int j = -2; j <= 2; j++) {
                     int r = y + i;
