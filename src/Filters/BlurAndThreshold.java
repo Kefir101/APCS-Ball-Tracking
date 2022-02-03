@@ -53,11 +53,11 @@ public class BlurAndThreshold implements PixelFilter {
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 int[] rgb = {in[0][r][c], in[1][r][c], in[2][r][c]};
-                boolean red = rgb[0] > 2.7 * rgb[1] && rgb[0] > 2.7 * rgb[2];
-                boolean orange = rgb[0] > 2.7 * rgb[2] && rgb[1] > 2.7 * rgb[2] && rgb[0] > rgb[1]*1.3;
-                boolean yellow = rgb[0] > 2.7 * rgb[2] && rgb[1] > 2.7 * rgb[2];
-                boolean green = rgb[1] > 2.7 * rgb[0] && rgb[1] > 2.7 * rgb[2];
-                boolean blue = rgb[2] > 2.7 * rgb[0] && rgb[2] > 2.7 * rgb[1];
+                boolean red = rgb[0] > 2.2 * rgb[1] && rgb[0] > 2.2 * rgb[2];
+                boolean orange = rgb[0] > 2.2 * rgb[2] && rgb[1] > 2.2 * rgb[2] && rgb[0] > rgb[1]*1.3;
+                boolean yellow = rgb[0] > 1.9 * rgb[2] && rgb[1] > 1.9 * rgb[2];
+                boolean green = rgb[1] > 1.5 * rgb[0] && rgb[1] > 1.5 * rgb[2];
+                boolean blue = rgb[2] > 1.5 * rgb[0] && rgb[2] > 1.5 * rgb[1];
                 if (red || orange || yellow || green || blue) out[r][c] = 255;
             }
         }
