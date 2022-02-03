@@ -1,28 +1,28 @@
 package KMeans;
 
+
 import processing.core.PApplet;
 import processing.core.PVector;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class KMeansClustering extends PApplet{
+public class KMeansClustering extends PApplet {
     float width = 800;
     float height = 800;
     int numberOfDataPoints = 0;
     int K = 4;
-    boolean startClusering = false;
+    boolean startClustering = false;
     ArrayList<Datum> dataList = randomDatumList(numberOfDataPoints, 255);
     ArrayList<Integer> clusterColorList = new ArrayList<>(Arrays.asList(0, color(255, 0, 0), color(0, 255, 0), color(0, 0, 255), color(255, 255, 0)));
     ArrayList<PVector> clusterList = new ArrayList(Collections.nCopies(K+1, 0));
-
     public void settings() {
         size((int) width, (int) height);
     }
     public void setup() {
         background(51);
+        System.out.println("here");
         for (Datum datum : dataList) {
             datum.cluster = (int) (random(K) + 1);
         }
@@ -38,7 +38,7 @@ public class KMeansClustering extends PApplet{
                 datum.cluster = (int) (random(K) + 1);
             }
         }
-        if(startClusering) {
+        if(startClustering) {
             frameRate(1);
             ArrayList<PVector> prevClusterList = (ArrayList<PVector>) clusterList.clone();
             for (int i = 1; i <= K; i++) {
@@ -75,13 +75,13 @@ public class KMeansClustering extends PApplet{
                 System.out.println("DONE");
             }
         }else if (mousePressed){
-            dataList.add(new Datum(new Point(mouseX, mouseY), 255));
+            dataList.add(new Datum(new PVector(mouseX, mouseY), 255));
         }
     }
     public ArrayList<Datum> randomDatumList(int size, int dataColor) {
         ArrayList<Datum> list = new ArrayList();
         for (int i = 0; i < size; i++) {
-            list.add(new Datum(new Point(random(width), random(height)), dataColor));
+            list.add(new Datum(new PVector(random(width), random(height)), dataColor));
         }
         return list;
     }
@@ -90,13 +90,13 @@ public class KMeansClustering extends PApplet{
             noLoop();
             System.out.println("Stopped");
         } else if (key == 'a'){
-            startClusering = true;
+            startClustering = true;
             System.out.println("startClustering");
         } else if (key == 'r'){
             frameRate(60);
             dataList = randomDatumList(numberOfDataPoints, 255);
             clusterList = new ArrayList(Collections.nCopies(K+1, 0));
-            startClusering = false;
+            startClustering = false;
             System.out.println("reset");
         } else if(key == 'd'){
             loop();
@@ -104,7 +104,6 @@ public class KMeansClustering extends PApplet{
         }
     }
     public static void main(String[] args) {
-        PApplet.main("Kmeans.KMeansClustering");
+        PApplet.main("KMeans.KMeansClustering");
     }
-
 }

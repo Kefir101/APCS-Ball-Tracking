@@ -1,12 +1,14 @@
 package KMeans;
 
+import processing.core.PVector;
+
 import static processing.core.PApplet.dist;
 import static processing.core.PApplet.hex;
 
 public class Datum {
-    Point pos;
+    PVector pos;
     int color, cluster = 0;
-    public Datum(Point pos_, int color_){
+    public Datum(PVector pos_, int color_){
         this.pos = pos_;
         this.color = color_;
     }
