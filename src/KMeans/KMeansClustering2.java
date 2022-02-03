@@ -25,9 +25,9 @@ public class KMeansClustering2 extends PApplet {
     public void setup() {
         background(51);
         int clusters = 3;
+        int radius = 10;
         int[] centerX = {100, 300, 500};
         int[] centerY = {100, 300, 500};
-        int radius = 10;
         for (int cluster = 0; cluster < clusters; cluster++) {
             int centerx = centerX[cluster];
             int centery = centerY[cluster];
