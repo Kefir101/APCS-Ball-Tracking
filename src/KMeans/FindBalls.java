@@ -10,7 +10,7 @@
 //public class FindBalls extends PApplet {
 //    private int K;
 //    private boolean startClustering;
-//    private ArrayList<Point> dataList = new ArrayList<>();
+//    private ArrayList<Point> dataList = new ArrayList<Point>();
 //    ArrayList<Integer> clusterColorList = new ArrayList<>(Arrays.asList(0, color(255, 0, 0), color(0, 255, 0), color(0, 0, 255), color(255, 255, 0)));
 //    ArrayList<Point> clusterList = new ArrayList(Collections.nCopies(K+1, 0));
 //    public FindBalls(DImage img, int k){

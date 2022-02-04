@@ -22,7 +22,6 @@ public class KMeansClustering extends PApplet {
     }
     public void setup() {
         background(51);
-        System.out.println("here");
         for (Datum datum : dataList) {
             datum.cluster = (int) (random(K) + 1);
         }
