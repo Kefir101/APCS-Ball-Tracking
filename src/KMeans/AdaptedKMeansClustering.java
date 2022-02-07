@@ -11,7 +11,7 @@ import java.util.Comparator;
 public class AdaptedKMeansClustering extends PApplet {
     float width = 800;
     float height = 600;
-    int K = 6;
+    int K = 4;
     boolean startClustering = false;
     short[][] img = new short[(int) height][(int) width];
     Datum[][] dataGrid = new Datum[img.length][img[0].length];

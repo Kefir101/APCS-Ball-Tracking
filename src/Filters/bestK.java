@@ -7,13 +7,13 @@ import processing.core.PVector;
 
 import java.util.ArrayList;
 
-public class BlurAndThreshold implements PixelFilter {
+public class bestK implements PixelFilter {
     public static final int WHITE = 255, BLACK = 0;
     @Override
     public DImage processImage(DImage img) {
         DImage newImg = threshold(blur(img));
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
-        int K = 1;
+        int K = 6;
         ArrayList<PVector> balls;
         /**compactness = is it an actual circle, check for size
          * isSeparated = are the crusters not too close to each other**/
@@ -47,8 +47,8 @@ public class BlurAndThreshold implements PixelFilter {
             }
             if (isLegit) isCompact = true;
             if (!tooClose) isSeparated = true;
-            K--;
-        }while((!isCompact || !isSeparated )&& K <= 6);
+            K++;
+        }while((!isCompact || !isSeparated )&& K < 6);
 
         /**DRAW THE RESULTED CRUSTERS*/
         int radius = 10;

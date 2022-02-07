@@ -84,7 +84,8 @@ public class FindBallCenters extends PApplet {
 //                    }
 //                }
 //            }
-            if(prevClusterList != null) {
+            /*
+           if(prevClusterList != null) {
                 noChange = true;
                 for (int i = 1; i < clusterList.size(); i++) {
                     PVector oldList = prevClusterList.get(i);
@@ -92,6 +93,13 @@ public class FindBallCenters extends PApplet {
                     float distance = dist(oldList.x, oldList.y, newList.x, newList.y);
                     if (distance > closeEnough) noChange = false;
                 }
+            }
+
+             */
+
+
+            if(prevClusterList!=null&& prevClusterList.equals(clusterList)) {
+                break;
             }
             prevClusterList = (ArrayList<PVector>) clusterList.clone();
 //            System.out.println(clusterList);
