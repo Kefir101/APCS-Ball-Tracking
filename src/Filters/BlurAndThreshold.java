@@ -13,44 +13,44 @@ public class BlurAndThreshold implements PixelFilter {
     public DImage processImage(DImage img) {
         DImage newImg = threshold(blur(img));
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
-        int K = 1;
-        ArrayList<PVector> balls;
+        int K = 5;
+        FindBallCenters findBalls = new FindBallCenters(newImg, K);
+        ArrayList<PVector> balls = findBalls.findBallCenters();
         /**compactness = is it an actual circle, check for size
-         * isSeparated = are the crusters not too close to each other**/
-        boolean isCompact = false;
-        boolean isSeparated = false;
-        do{
-            FindBallCenters findBalls = new FindBallCenters(newImg, K);
-            balls = findBalls.findBallCenters();
-            boolean tooClose = false;
-            boolean isLegit = true;
-            for (int b = 1; b < balls.size(); b++) {
-                PVector point = balls.get(b);
-                if(!checkCluster(point, newImg)) {
-                    balls.remove(b);
-                    b--;
-                    isLegit = false;
-                }
-            }
-            for (int b1 = 1; b1 < balls.size(); b1++) {
-                for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
-                    PVector a = balls.get(b1);
-                    PVector b = balls.get(b2);
-                    if (b1 != balls.size()-1) {
-                        double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 80) {
-                            tooClose = true;
-                            K--;
-                        }
-                    }
-                }
-            }
-            if (isLegit) isCompact = true;
-            if (!tooClose) isSeparated = true;
-            K--;
-        }while((!isCompact || !isSeparated )&& K <= 6);
+         * isSeparated = are the clusters not too close to each other**/
+//        boolean isCompact = false;
+//        boolean isSeparated = false;
+//        do{
+//            FindBallCenters findBalls = new FindBallCenters(newImg, K);
+//            balls = findBalls.findBallCenters();
+//            boolean tooClose = false;
+//            boolean isLegit = true;
+//            for (int b = 1; b < balls.size(); b++) {
+//                PVector point = balls.get(b);
+//                if(!checkCluster(point, newImg)) {
+//                    balls.remove(b);
+//                    b--;
+//                    isLegit = false;
+//                }
+//            }
+//            for (int b1 = 1; b1 < balls.size(); b1++) {
+//                for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
+//                    PVector a = balls.get(b1);
+//                    PVector b = balls.get(b2);
+//                    if (b1 != balls.size()-1) {
+//                        double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+//                        if (dist < 80) {
+//                            tooClose = true;
+//                            K--;
+//                        }
+//                    }
+//                }
+//            }
+//            if (isLegit) isCompact = true;
+//            if (!tooClose) isSeparated = true;
+//            K--;
+//        }while((!isCompact || !isSeparated )&& K <= 6);
 
-        /**DRAW THE RESULTED CRUSTERS*/
         int radius = 10;
         for (int b = 1; b < balls.size(); b++) {
             PVector point = balls.get(b);
@@ -71,7 +71,6 @@ public class BlurAndThreshold implements PixelFilter {
 
         img.setColorChannels(out[0],out[1], out[2]);
         return img;
-       // return newImg;
     }
     private int findRadius(PVector center, DImage img){
         short[][]grid = img.getBWPixelGrid();
@@ -100,8 +99,6 @@ public class BlurAndThreshold implements PixelFilter {
         }
         return radius;
     }
-
-
     private boolean checkCluster(PVector point, DImage img) { //check for circleness and size
         short[][] BWgrid = img.getBWPixelGrid();
         int x = (int) point.x;
@@ -110,7 +107,7 @@ public class BlurAndThreshold implements PixelFilter {
         int numPoints = 0;
         int radius = findRadius(point, img); // find upper edge of cluster and return false if it is too big or too small
         if (radius < (img.getWidth() / 40.0) || radius > (img.getWidth() / 6.0)) return false;
-        /** find total distances of all the points in the cluster**/
+        /**find total distances of all the points in the cluster **/
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
                 int Y = y + i;
@@ -124,14 +121,8 @@ public class BlurAndThreshold implements PixelFilter {
             }
         }
         /**if the actual average distance-supposed average distance is less than 30 return true**/
-        if (Math.abs((totalDist / numPoints) - (radius * 2 / 3.0)) < 30) {
-            return true;
-        }
-        return false;
+        return Math.abs((totalDist / numPoints) - (radius * 2 / 3.0)) < 30;
     }
-
-
-
     private DImage outline(DImage original, DImage img) {
         short[][][] out = {original.getRedChannel(), original.getGreenChannel(), original.getBlueChannel()};
         int maxX = 0, maxY = 0, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
