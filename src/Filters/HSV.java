@@ -1,11 +1,11 @@
 package Filters;
 
-public class hsv {
+public class HSV {
     /**hue: 0-255 saturation: 0-100 value: 0-100**/
     double hue;
     double saturation;
     double value;
-    public hsv(double r, double g, double b){
+    public HSV(double r, double g, double b){
         r = r/255.0;
         g = g/255.0;
         b = b/255.0;

@@ -9,47 +9,49 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class bestK implements PixelFilter {
+public class Filter implements PixelFilter {
     public static final int WHITE = 255, BLACK = 0;
     @Override
     public DImage processImage(DImage img) {
         DImage newImg = threshold(blur(img));
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
-        int K = 6;
-        ArrayList<PVector> balls;
-
-
-        boolean isSeparated = false;
-        do{
-            FindBallCenters findBalls = new FindBallCenters(newImg, K);
-            balls = findBalls.findBallCenters();
-            boolean tooClose = false;
-            boolean isLegit = true;
-            for (int b = 1; b < balls.size(); b++) {
-                PVector point = balls.get(b);
-                if(!checkCluster(point, newImg)) {
-                    balls.remove(b);
-                    b--;
-                    isLegit = false;
-                }
-            }
-            for (int b1 = 1; b1 < balls.size(); b1++) {
-                for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
-                    PVector a = balls.get(b1);
-                    PVector b = balls.get(b2);
-                    if (b1 != balls.size()-1) {
-                        double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 50) {
-                            tooClose = true;
-                            //K--;
-                        }
-                    }
-                }
-            }
-            if (!tooClose && isLegit) isSeparated = true;
-            /*if (tooClose) */K--;
-            System.out.println("iterated");
-        }while(!isSeparated && K > 0);
+        int K = 4;
+        FindBallCenters findBalls = new FindBallCenters(newImg, K);
+        ArrayList<PVector> balls = findBalls.findBallCenters();
+        /**compactness = is it an actual circle, check for size
+         * isSeparated = are the clusters not too close to each other**/
+//        boolean isCompact = false;
+//        boolean isSeparated = false;
+//        do{
+//            FindBallCenters findBalls = new FindBallCenters(newImg, K);
+//            balls = findBalls.findBallCenters();
+//            boolean tooClose = false;
+//            boolean isLegit = true;
+//            for (int b = 1; b < balls.size(); b++) {
+//                PVector point = balls.get(b);
+//                if(!checkCluster(point, newImg)) {
+//                    balls.remove(b);
+//                    b--;
+//                    isLegit = false;
+//                }
+//            }
+//            for (int b1 = 1; b1 < balls.size(); b1++) {
+//                for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
+//                    PVector a = balls.get(b1);
+//                    PVector b = balls.get(b2);
+//                    if (b1 != balls.size()-1) {
+//                        double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+//                        if (dist < 80) {
+//                            tooClose = true;
+//                            K--;
+//                        }
+//                    }
+//                }
+//            }
+//            if (isLegit) isCompact = true;
+//            if (!tooClose) isSeparated = true;
+//            K--;
+//        }while((!isCompact || !isSeparated )&& K <= 6);
 
         int radius = 10;
         for (int b = 1; b < balls.size(); b++) {
@@ -82,46 +84,35 @@ public class bestK implements PixelFilter {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-        return img;
-
-
-
-       //return newImg;
+        return newImg;
     }
     private int findRadius(PVector center, DImage img){
         short[][]grid = img.getBWPixelGrid();
-        /*int radUP = 1; int radDOWN = 1; int radR = 1; int radL = 1;
-        int radiTotal = 0;
-        while(grid[(int)center.y-radUP][(int)center.x] == 255 && center.y - radUP >= 0){//up
-                radUP++;
-                radiTotal++;
+        int radius = 1;
+        /*if (direction.equals("UP")){
+            while(grid[(int)center.y-radius][(int)center.x] == 255 && radius >= 0){
+                radius++;
+            }
+        }else if (direction.equals("DOWN")){
+            while(grid[(int)center.y+radius][(int)center.x] == 255 && radius < grid.length){
+                radius++;
+            }
+        }else if(direction.equals("RIGHT")){
+            while(grid[(int)center.y][(int)center.x+radius] == 255 && radius < grid[0].length){
+                radius++;
+            }
+        }else{
+            while(grid[(int)center.y][(int)center.x-radius] == 255 && radius >= 0){
+                radius++;
+            }
         }
-        while(grid[(int)center.y+radDOWN][(int)center.x] == 255 && radDOWN+center.y < grid.length){//down
-                radDOWN++;
-                radiTotal++;
-        }
-        while(grid[(int)center.y][(int)center.x+radR] == 255 && radR + center.x < grid[0].length){//right
-                radR++;
-                radiTotal++;
-        }
-        while(grid[(int)center.y][(int)center.x-radL] == 255 && center.x- radL >= 0){//left
-                radL++;
-                radiTotal++;
-        }
-        double averageRad = radiTotal/4;
-        if (averageRad-)
-
-        return radiTotal/4;
 
          */
-        int radius = 1;
-        while(grid[(int)center.y-radius][(int)center.x] == 255 && center.y - radius >= 0){//up
+        while(center.y-radius >= 0 && grid[(int)center.y-radius][(int)center.x] == 255){
             radius++;
         }
         return radius;
     }
-
-
     private boolean checkCluster(PVector point, DImage img) { //check for circleness and size
         short[][] BWgrid = img.getBWPixelGrid();
         int x = (int) point.x;
@@ -130,7 +121,7 @@ public class bestK implements PixelFilter {
         int numPoints = 0;
         int radius = findRadius(point, img); // find upper edge of cluster and return false if it is too big or too small
         if (radius < (img.getWidth() / 40.0) || radius > (img.getWidth() / 6.0)) return false;
-        /** find total distances of all the points in the cluster**/
+        /**find total distances of all the points in the cluster **/
         for (int i = -radius; i <= radius; i++) {
             for (int j = -radius; j <= radius; j++) {
                 int Y = y + i;
@@ -144,14 +135,8 @@ public class bestK implements PixelFilter {
             }
         }
         /**if the actual average distance-supposed average distance is less than 30 return true**/
-        if (Math.abs((totalDist / numPoints) - (radius * 2 / 3.0)) < 30) {
-            return true;
-        }
-        return false;
+        return Math.abs((totalDist / numPoints) - (radius * 2 / 3.0)) < 30;
     }
-
-
-
     private DImage outline(DImage original, DImage img) {
         short[][][] out = {original.getRedChannel(), original.getGreenChannel(), original.getBlueChannel()};
         int maxX = 0, maxY = 0, minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
@@ -190,47 +175,30 @@ public class bestK implements PixelFilter {
     public DImage threshold(DImage img) {
         int height = img.getRedChannel().length;
         int width = img.getRedChannel()[0].length;
-        hsv[][] pixels = convertToHSV(img);
+        short[][][] in = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         short[][] out = new short[height][width];
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
-                hsv color = pixels[r][c];
-                if (color.value > 40 && color.saturation > 40) {
-                    boolean red = color.hue >= 0 && color.hue <= 20;
-                    /*boolean yellow = color.hue > 60 && color.hue <= 120;
-                    boolean green = color.hue > 120 && color.hue <= 180;
-                    boolean blue = color.hue > 180 && color.hue <= 300;
-
-                     */
-
-                    out[r][c] = WHITE;
-                }
+                int[] rgb = {in[0][r][c], in[1][r][c], in[2][r][c]};
+                boolean red = rgb[0] > 2.4 * rgb[1] && rgb[0] > 2.2 * rgb[2];
+                boolean orange = rgb[0] > 2.4 * rgb[2] && rgb[1] > 2.9 * rgb[2] && rgb[0] > rgb[1]*1.3;
+                boolean yellow = rgb[0] > 2.5 * rgb[2] && rgb[1] > 2.5 * rgb[2];
+                boolean green = rgb[1] > 1.5 * rgb[0] && rgb[1] > 1.5 * rgb[2];
+                boolean blue = rgb[2] > 1.5 * rgb[0] && rgb[2] > 1.5 * rgb[1];
+                if (red || orange || yellow || green || blue) out[r][c] = WHITE;
             }
         }
         DImage outImg = new DImage(width, height);
         outImg.setPixels(out);
         return outImg;
     }
-
-    private hsv[][] convertToHSV(DImage img) {
-        short[][][] in = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
-        hsv[][] out = new hsv[img.getHeight()][img.getWidth()];
-        for (int r = 0; r < img.getHeight(); r++) {
-            for (int c = 0; c < img.getWidth(); c++) {
-                hsv pixel = new hsv(in[0][r][c], in[1][r][c], in[2][r][c]);
-                out[r][c] = pixel;
-            }
-        }
-        return out;
-    }
-
     public DImage blur(DImage in) {
         int height = in.getRedChannel().length;
         int width = in.getRedChannel()[0].length;
         short[][][] inColors = {in.getRedChannel(), in.getGreenChannel(), in.getBlueChannel()};
         short[][][] outColors = new short[3][height][width];
 //        int kernelSize = Integer.parseInt(JOptionPane.showInputDialog(null, "Kernel Size (odd only): "));
-        int kernelSize = 9;
+        int kernelSize = 15;
         double[][] kernel = new double[kernelSize][kernelSize];
         createBoxBlur(kernel);
         double weightsSum = calculateSum(kernel);
