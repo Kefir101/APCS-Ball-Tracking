@@ -5,6 +5,8 @@ import KMeans.FindBallCenters;
 import core.DImage;
 import processing.core.PVector;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class BlurAndThreshold implements PixelFilter {
@@ -13,7 +15,7 @@ public class BlurAndThreshold implements PixelFilter {
     public DImage processImage(DImage img) {
         DImage newImg = threshold(blur(img));
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
-        int K = 5;
+        int K = 4;
         FindBallCenters findBalls = new FindBallCenters(newImg, K);
         ArrayList<PVector> balls = findBalls.findBallCenters();
         /**compactness = is it an actual circle, check for size
@@ -70,7 +72,19 @@ public class BlurAndThreshold implements PixelFilter {
         }
 
         img.setColorChannels(out[0],out[1], out[2]);
-        return img;
+        try {
+            FileWriter writer = new FileWriter("center_positions.txt");
+            for (int i = 1; i <= K; i++) {
+                PVector ball = balls.get(i);
+                writer.write(ball.x + ", " + ball.y + "\n");
+            }
+            writer.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        return newImg;
     }
     private int findRadius(PVector center, DImage img){
         short[][]grid = img.getBWPixelGrid();

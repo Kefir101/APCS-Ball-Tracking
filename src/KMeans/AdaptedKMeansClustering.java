@@ -63,8 +63,8 @@ public class AdaptedKMeansClustering extends PApplet {
     //decomposed/helper methods
     public void createData(){
         int radius = 20;
-        int[] centerXs = {200, 400, 500, 500};
-        int[] centerYs = {100, 500, 400, 100};
+        int[] centerXs = {100, 150, 200, 250};
+        int[] centerYs = {100, 150, 200, 250};
         for (int cluster = 0; cluster < centerXs.length; cluster++) {
             int centerX = centerXs[cluster];
             int centerY = centerYs[cluster];
