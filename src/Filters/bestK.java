@@ -12,11 +12,14 @@ public class bestK implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
         DImage newImg = threshold(blur(img));
-        short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
+        /*short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
         ArrayList<PVector> balls;
-        /**compactness = is it an actual circle, check for size
+
+         */
+         /**compactness = is it an actual circle, check for size
          * isSeparated = are the crusters not too close to each other**/
+         /*
         boolean isCompact = false;
         boolean isSeparated = false;
         do{
@@ -40,17 +43,17 @@ public class bestK implements PixelFilter {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
                         if (dist < 80) {
                             tooClose = true;
-                            K--;
+                            //K--;
                         }
                     }
                 }
             }
-            if (isLegit) isCompact = true;
-            if (!tooClose) isSeparated = true;
-            K++;
-        }while((!isCompact || !isSeparated )&& K < 6);
+            if (!tooClose && isLegit) isSeparated = true;
+            if (tooClose) K--;
+        }while(!isSeparated && K < 6);
 
         /**DRAW THE RESULTED CRUSTERS*/
+        /*
         int radius = 10;
         for (int b = 1; b < balls.size(); b++) {
             PVector point = balls.get(b);
@@ -71,31 +74,37 @@ public class bestK implements PixelFilter {
 
         img.setColorChannels(out[0],out[1], out[2]);
         return img;
-       // return newImg;
+        */
+       return newImg;
     }
     private int findRadius(PVector center, DImage img){
         short[][]grid = img.getBWPixelGrid();
-        int radius = 1;
-        /*if (direction.equals("UP")){
-            while(grid[(int)center.y-radius][(int)center.x] == 255 && radius >= 0){
-                radius++;
-            }
-        }else if (direction.equals("DOWN")){
-            while(grid[(int)center.y+radius][(int)center.x] == 255 && radius < grid.length){
-                radius++;
-            }
-        }else if(direction.equals("RIGHT")){
-            while(grid[(int)center.y][(int)center.x+radius] == 255 && radius < grid[0].length){
-                radius++;
-            }
-        }else{
-            while(grid[(int)center.y][(int)center.x-radius] == 255 && radius >= 0){
-                radius++;
-            }
+        /*int radUP = 1; int radDOWN = 1; int radR = 1; int radL = 1;
+        int radiTotal = 0;
+        while(grid[(int)center.y-radUP][(int)center.x] == 255 && center.y - radUP >= 0){//up
+                radUP++;
+                radiTotal++;
         }
+        while(grid[(int)center.y+radDOWN][(int)center.x] == 255 && radDOWN+center.y < grid.length){//down
+                radDOWN++;
+                radiTotal++;
+        }
+        while(grid[(int)center.y][(int)center.x+radR] == 255 && radR + center.x < grid[0].length){//right
+                radR++;
+                radiTotal++;
+        }
+        while(grid[(int)center.y][(int)center.x-radL] == 255 && center.x- radL >= 0){//left
+                radL++;
+                radiTotal++;
+        }
+        double averageRad = radiTotal/4;
+        if (averageRad-)
+
+        return radiTotal/4;
 
          */
-        while(center.y-radius >= 0 && grid[(int)center.y-radius][(int)center.x] == 255){
+        int radius = 1;
+        while(grid[(int)center.y-radius][(int)center.x] == 255 && center.y - radius >= 0){//up
             radius++;
         }
         return radius;
@@ -170,30 +179,47 @@ public class bestK implements PixelFilter {
     public DImage threshold(DImage img) {
         int height = img.getRedChannel().length;
         int width = img.getRedChannel()[0].length;
-        short[][][] in = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
+        hsv[][] pixels = convertToHSV(img);
         short[][] out = new short[height][width];
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
-                int[] rgb = {in[0][r][c], in[1][r][c], in[2][r][c]};
-                boolean red = rgb[0] > 2.4 * rgb[1] && rgb[0] > 2.2 * rgb[2];
-                boolean orange = rgb[0] > 2.4 * rgb[2] && rgb[1] > 2.9 * rgb[2] && rgb[0] > rgb[1]*1.3;
-                boolean yellow = rgb[0] > 2.5 * rgb[2] && rgb[1] > 2.5 * rgb[2];
-                boolean green = rgb[1] > 1.5 * rgb[0] && rgb[1] > 1.5 * rgb[2];
-                boolean blue = rgb[2] > 1.5 * rgb[0] && rgb[2] > 1.5 * rgb[1];
-                if (red || orange || yellow || green || blue) out[r][c] = WHITE;
+                hsv color = pixels[r][c];
+                if (color.value > 40 && color.saturation > 40) {
+                    boolean red = color.hue >= 0 && color.hue <= 20;
+                    /*boolean yellow = color.hue > 60 && color.hue <= 120;
+                    boolean green = color.hue > 120 && color.hue <= 180;
+                    boolean blue = color.hue > 180 && color.hue <= 300;
+
+                     */
+
+                    out[r][c] = WHITE;
+                }
             }
         }
         DImage outImg = new DImage(width, height);
         outImg.setPixels(out);
         return outImg;
     }
+
+    private hsv[][] convertToHSV(DImage img) {
+        short[][][] in = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
+        hsv[][] out = new hsv[img.getHeight()][img.getWidth()];
+        for (int r = 0; r < img.getHeight(); r++) {
+            for (int c = 0; c < img.getWidth(); c++) {
+                hsv pixel = new hsv(in[0][r][c], in[1][r][c], in[2][r][c]);
+                out[r][c] = pixel;
+            }
+        }
+        return out;
+    }
+
     public DImage blur(DImage in) {
         int height = in.getRedChannel().length;
         int width = in.getRedChannel()[0].length;
         short[][][] inColors = {in.getRedChannel(), in.getGreenChannel(), in.getBlueChannel()};
         short[][][] outColors = new short[3][height][width];
 //        int kernelSize = Integer.parseInt(JOptionPane.showInputDialog(null, "Kernel Size (odd only): "));
-        int kernelSize = 15;
+        int kernelSize = 9;
         double[][] kernel = new double[kernelSize][kernelSize];
         createBoxBlur(kernel);
         double weightsSum = calculateSum(kernel);
