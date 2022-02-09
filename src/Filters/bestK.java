@@ -5,6 +5,8 @@ import KMeans.FindBallCenters;
 import core.DImage;
 import processing.core.PVector;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class bestK implements PixelFilter {
@@ -12,15 +14,11 @@ public class bestK implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
         DImage newImg = threshold(blur(img));
-        /*short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
+        short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
         ArrayList<PVector> balls;
 
-         */
-         /**compactness = is it an actual circle, check for size
-         * isSeparated = are the crusters not too close to each other**/
-         /*
-        boolean isCompact = false;
+
         boolean isSeparated = false;
         do{
             FindBallCenters findBalls = new FindBallCenters(newImg, K);
@@ -41,7 +39,7 @@ public class bestK implements PixelFilter {
                     PVector b = balls.get(b2);
                     if (b1 != balls.size()-1) {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 80) {
+                        if (dist < 50) {
                             tooClose = true;
                             //K--;
                         }
@@ -49,11 +47,10 @@ public class bestK implements PixelFilter {
                 }
             }
             if (!tooClose && isLegit) isSeparated = true;
-            if (tooClose) K--;
-        }while(!isSeparated && K < 6);
+            /*if (tooClose) */K--;
+            System.out.println("iterated");
+        }while(!isSeparated && K > 0);
 
-        /**DRAW THE RESULTED CRUSTERS*/
-        /*
         int radius = 10;
         for (int b = 1; b < balls.size(); b++) {
             PVector point = balls.get(b);
@@ -73,9 +70,23 @@ public class bestK implements PixelFilter {
         }
 
         img.setColorChannels(out[0],out[1], out[2]);
+        try {
+            FileWriter writer = new FileWriter("center_positions.txt");
+            for (int i = 1; i <= K; i++) {
+                PVector ball = balls.get(i);
+                writer.write(ball.x + ", " + ball.y + "\n");
+            }
+            writer.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
         return img;
-        */
-       return newImg;
+
+
+
+       //return newImg;
     }
     private int findRadius(PVector center, DImage img){
         short[][]grid = img.getBWPixelGrid();
