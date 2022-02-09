@@ -17,8 +17,6 @@ public class FilterAndBestK implements PixelFilter {
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
         ArrayList<PVector> balls;
-
-
         boolean isSeparated = false;
         do{
             FindBallCenters findBalls = new FindBallCenters(newImg, K);
@@ -41,14 +39,13 @@ public class FilterAndBestK implements PixelFilter {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
                         if (dist < 50) {
                             tooClose = true;
-                            //K--;
                         }
                     }
                 }
             }
             if (!tooClose && isLegit) isSeparated = true;
-            /*if (tooClose) */K--;
-            System.out.println("iterated");
+            K--;
+            System.out.println("K = " + (K + 1) + " -> K = " + K);
         }while(!isSeparated && K > 0);
 
         int radius = 10;
@@ -70,22 +67,8 @@ public class FilterAndBestK implements PixelFilter {
         }
 
         img.setColorChannels(out[0],out[1], out[2]);
-        try {
-            FileWriter writer = new FileWriter("center_positions.txt");
-            for (int i = 1; i <= K; i++) {
-                PVector ball = balls.get(i);
-                writer.write(ball.x + ", " + ball.y + "\n");
-            }
-            writer.close();
-            System.out.println("Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+        writeToFile(balls);
         return img;
-
-
-
        //return newImg;
     }
 
@@ -153,16 +136,7 @@ public class FilterAndBestK implements PixelFilter {
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
-                if (color.value > 40 && color.saturation > 40) {
-                    boolean red = color.hue >= 0 && color.hue <= 20;
-                    /*boolean yellow = color.hue > 60 && color.hue <= 120;
-                    boolean green = color.hue > 120 && color.hue <= 180;
-                    boolean blue = color.hue > 180 && color.hue <= 300;
-
-                     */
-
-                    out[r][c] = WHITE;
-                }
+                if (color.value > 40 && color.saturation > 40) out[r][c] = WHITE;
             }
         }
         DImage outImg = new DImage(width, height);
@@ -237,6 +211,21 @@ public class FilterAndBestK implements PixelFilter {
             }
         }
         return total;
+    }
+
+    private void writeToFile(ArrayList<PVector> balls){
+        try {
+            FileWriter writer = new FileWriter("center_positions.txt");
+            for (int i = 1; i < balls.size(); i++) {
+                PVector ball = balls.get(i);
+                writer.write(ball.x + ", " + ball.y + "\n");
+            }
+            writer.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 }
 

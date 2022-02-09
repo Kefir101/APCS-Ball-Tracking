@@ -2,9 +2,7 @@ package Filters;
 
 public class HSV {
     /**hue: 0-255 saturation: 0-100 value: 0-100**/
-    double hue;
-    double saturation;
-    double value;
+    double hue, saturation, value;
     public HSV(double r, double g, double b){
         r = r/255.0;
         g = g/255.0;
@@ -12,7 +10,7 @@ public class HSV {
         double cMax = Math.max(r, Math.max(g, b));
         double cMin = Math.min(r, Math.min(g, b));
         double diff = cMax - cMin;
-        hue = -1; saturation = -1; value = -1;
+        hue = saturation = value = -1;
         if(cMax == cMin) hue = 0;
         else if (cMax == r){
             hue = (60*((g-b)/diff)+360) % 360;
