@@ -17,22 +17,18 @@ public class FilterAndBestK implements PixelFilter {
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
         ArrayList<PVector> balls;
-
-        boolean keepGoing = false;
-        boolean isSeparated = false;
+        boolean keepGoing;
         do{
-            FindBallCenters findBalls = new FindBallCenters(newImg, K);
-            balls = findBalls.findBallCenters();
-            boolean tooClose = false;
-            boolean subTractK = false;
             keepGoing = false;
+            boolean tooClose = false, notBall = false;
+            balls = new FindBallCenters(newImg, K).findBallCenters();
             for (int b1 = 1; b1 < balls.size(); b1++) {
                 for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
                     PVector a = balls.get(b1);
                     PVector b = balls.get(b2);
                     if (b1 != balls.size()-1) {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 60) {
+                        if (dist < 110) {
                             tooClose = true;
                         }
                     }
@@ -41,23 +37,19 @@ public class FilterAndBestK implements PixelFilter {
             for (int b = 1; b < balls.size(); b++) {
                 PVector point = balls.get(b);
                 if(!checkCluster(point, newImg)) {
-                    keepGoing = true;
+                   notBall = true;
                 }
             }
-            if (tooClose){
-                K--;
+            if(K == 0) break;
+            if (tooClose || notBall){
                 keepGoing = true;
-            }else{
-                break;
+                K--;
+                System.out.println("K = " + (K+1) + " -> K = " + K);
             }
-            System.out.println(K);
-        }while(keepGoing && K > 0);
-        System.out.println(balls);
-
+        }while(keepGoing);
         if (K == 0) {
             K = 6;
-            FindBallCenters finalBalls = new FindBallCenters(newImg, K);
-            balls = finalBalls.findBallCenters();;
+            balls = new FindBallCenters(newImg, K).findBallCenters();
         }
 
         int radius = 10;
@@ -92,10 +84,6 @@ public class FilterAndBestK implements PixelFilter {
             e.printStackTrace();
         }
         return img;
-
-
-
-       //return newImg;
     }
 
     private int findRadius(PVector center, DImage img){
@@ -163,13 +151,6 @@ public class FilterAndBestK implements PixelFilter {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
                 if (color.value > 40 && color.saturation > 40) {
-                    boolean red = color.hue >= 0 && color.hue <= 20;
-                    /*boolean yellow = color.hue > 60 && color.hue <= 120;
-                    boolean green = color.hue > 120 && color.hue <= 180;
-                    boolean blue = color.hue > 180 && color.hue <= 300;
-
-                     */
-
                     out[r][c] = WHITE;
                 }
             }

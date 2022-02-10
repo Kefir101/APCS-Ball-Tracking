@@ -7,7 +7,7 @@ import static processing.core.PApplet.hex;
 
 public class Datum {
     PVector pos;
-    int color = 255, cluster = 0;
+    int color, cluster = 0;
     boolean isData = false;
     public Datum(PVector pos_, int color_){
         this.pos = pos_;

@@ -19,20 +19,20 @@ public class FindBallCenters {
         initializeData(pixels);
         clusterList = findBestOriginalClusterList();
         iterations = 0;
-        System.out.println("SETUP COMPLETE");
+//        System.out.println("SETUP COMPLETE");
     }
     public ArrayList<PVector> findBallCenters(){
         ArrayList<PVector> prevClusterList;
         do {
-            System.out.println("doing closest C to P");
+//            System.out.println("doing closest C to P");
             for(Datum datum : whitePoints) closestClusterToPoint(datum);
-            System.out.println("finished closest C to P");
+//            System.out.println("finished closest C to P");
             prevClusterList = (ArrayList<PVector>) clusterList.clone();
             for (int i = 1; i <= K; i++) recalculateCentroids(i);
-            System.out.println("finished recalculating Cs");
+//            System.out.println("finished recalculating Cs");
             iterations++;
+            if(iterations == 23) break;
         } while (!clusterList.equals(prevClusterList));
-        System.out.println(iterations);
         return clusterList;
     }
 
