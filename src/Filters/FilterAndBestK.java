@@ -47,10 +47,12 @@ public class FilterAndBestK implements PixelFilter {
             if (tooClose){
                 K--;
                 keepGoing = true;
+            }else{
+                break;
             }
             System.out.println(K);
         }while(keepGoing && K > 0);
-        System.out.println(K);
+        System.out.println(balls);
 
         if (K == 0) {
             K = 6;
