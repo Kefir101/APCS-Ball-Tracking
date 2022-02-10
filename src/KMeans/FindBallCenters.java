@@ -74,7 +74,8 @@ public class FindBallCenters {
         int cluster = 1;
         double minDist = Double.MAX_VALUE;
         for (int i = 1; i < clusterList.size(); i++) {
-            double distance = Math.hypot(datum.pos.x - clusterList.get(i).x, datum.pos.y - clusterList.get(i).y);
+            double distance = Math.sqrt((datum.pos.x - clusterList.get(i).x)*(datum.pos.x - clusterList.get(i).x)
+                    + (datum.pos.y - clusterList.get(i).y)*(datum.pos.y - clusterList.get(i).y));
             if(distance < minDist) {
                 cluster = i;
                 minDist = distance;
