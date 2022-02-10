@@ -18,22 +18,22 @@ public class FilterAndBestK implements PixelFilter {
         int K = 6;
         ArrayList<PVector> balls;
 
-
+        boolean keepGoing = false;
         boolean isSeparated = false;
         do{
             FindBallCenters findBalls = new FindBallCenters(newImg, K);
             balls = findBalls.findBallCenters();
             boolean tooClose = false;
             boolean subTractK = false;
+            keepGoing = false;
             for (int b1 = 1; b1 < balls.size(); b1++) {
                 for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
                     PVector a = balls.get(b1);
                     PVector b = balls.get(b2);
                     if (b1 != balls.size()-1) {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 100) {
+                        if (dist < 60) {
                             tooClose = true;
-                            subTractK = true;
                         }
                     }
                 }
@@ -41,15 +41,16 @@ public class FilterAndBestK implements PixelFilter {
             for (int b = 1; b < balls.size(); b++) {
                 PVector point = balls.get(b);
                 if(!checkCluster(point, newImg)) {
-                    balls.remove(b);
-                    b--;
-                    subTractK = true;
+                    keepGoing = true;
                 }
             }
-            if (!tooClose) isSeparated = true;
-            if (subTractK) K--;
+            if (tooClose){
+                K--;
+                keepGoing = true;
+            }
             System.out.println(K);
-        }while(!isSeparated && K > 0);
+        }while(keepGoing && K > 0);
+        System.out.println(K);
 
         if (K == 0) {
             K = 6;
