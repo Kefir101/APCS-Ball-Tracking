@@ -4,63 +4,57 @@ import core.DImage;
 import processing.core.PApplet;
 import processing.core.PVector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
-public class FindBallCenters extends PApplet {
+public class FindBallCenters {
     int K;
-    boolean startClustering = false;
-    Datum[][] dataGrid;
     ArrayList<PVector> clusterList;
-    ArrayList<PVector> whitePoints;
+    ArrayList<Datum> whitePoints;
+    int iterations;
     public FindBallCenters(DImage img, int k){
         K = k;
         clusterList = new ArrayList(Collections.nCopies(K+1, new PVector(0, 0)));
         whitePoints = new ArrayList<>();
         short[][] pixels = img.getBWPixelGrid();
-        dataGrid = new Datum[pixels.length][pixels[0].length];
         initializeData(pixels);
         clusterList = findBestOriginalClusterList();
+        iterations = 0;
+        System.out.println("SETUP COMPLETE");
     }
     public ArrayList<PVector> findBallCenters(){
         ArrayList<PVector> prevClusterList;
         do {
-            for (Datum[] row : dataGrid) {
-                for (Datum datum : row) {
-                    if(datum.isData) closestClusterToPoint(datum);
-                }
-            }
+            System.out.println("doing closest C to P");
+            for(Datum datum : whitePoints) closestClusterToPoint(datum);
+            System.out.println("finished closest C to P");
             prevClusterList = (ArrayList<PVector>) clusterList.clone();
-            for (int i = 1; i <= K; i++) {
-                recalculateCentroids(i);
-            }
+            for (int i = 1; i <= K; i++) recalculateCentroids(i);
+            System.out.println("finished recalculating Cs");
+            iterations++;
         } while (!clusterList.equals(prevClusterList));
+        System.out.println(iterations);
         return clusterList;
     }
 
     //decomposed/helper methods
     public void initializeData(short[][] pixels){
-        for (int i = 0; i < dataGrid.length; i++) {
-            for (int j = 0; j < dataGrid[0].length; j++) {
-                Datum datum = new Datum(new PVector(j, i), pixels[i][j]);
+        for (int i = 0; i < pixels.length; i++) {
+            for (int j = 0; j < pixels[0].length; j++) {
                 if(pixels[i][j] == 255) {
-                    datum.isData = true;
-                    whitePoints.add(new PVector(j, i));
+                    whitePoints.add(new Datum(new PVector(j, i), 255));
                 }
-                dataGrid[i][j] = datum;
             }
         }
     }
     public ArrayList<PVector> findBestOriginalClusterList(){
+        ArrayList<Datum> tempWhitePoints = (ArrayList<Datum>) whitePoints.clone();
         ArrayList<PVector> currentDistList = new ArrayList<>(Collections.nCopies(K+1, new PVector(0, 0)));
         ArrayList<PVector> maxDistList = null;
         double minMinDist = Double.MIN_VALUE;
         for (int i = 0; i < 100; i++) {
             double minDist = Double.MAX_VALUE;
-            Collections.shuffle(whitePoints);
-            for (int j = 1; j <= K; j++) currentDistList.set(j, whitePoints.get(j-1));
+            Collections.shuffle(tempWhitePoints);
+            for (int j = 1; j <= K; j++) currentDistList.set(j, tempWhitePoints.get(j-1).pos);
             for (int j = 1; j <= K; j++) {
                 PVector a = currentDistList.get(j);
                 for (int k = j+1; k <= K; k++) {
@@ -77,24 +71,25 @@ public class FindBallCenters extends PApplet {
         return maxDistList;
     }
     public void closestClusterToPoint(Datum datum){
-        ArrayList<ArrayList<Float>> allDistances = new ArrayList<>();
+        int cluster = 1;
+        double minDist = Double.MAX_VALUE;
         for (int i = 1; i < clusterList.size(); i++) {
-            float distance = dist(datum.pos.x, datum.pos.y, clusterList.get(i).x, clusterList.get(i).y);
-            allDistances.add(new ArrayList<>(Arrays.asList((float) i, distance)));
+            double distance = Math.hypot(datum.pos.x - clusterList.get(i).x, datum.pos.y - clusterList.get(i).y);
+            if(distance < minDist) {
+                cluster = i;
+                minDist = distance;
+            }
         }
-        allDistances.sort(Comparator.comparing(a -> a.get(1)));
-        datum.cluster = (int) (allDistances.get(0).get(0)).floatValue();
+        datum.cluster = cluster;
     }
     public void recalculateCentroids(int i){
         PVector totalCentroid = new PVector();
         int datumInCluster = 0;
-        for (Datum[] row : dataGrid) {
-            for (Datum datum : row) {
-                if (datum.cluster == i) {
-                    totalCentroid.x += datum.pos.x;
-                    totalCentroid.y += datum.pos.y;
-                    datumInCluster++;
-                }
+        for(Datum datum : whitePoints){
+            if (datum.cluster == i) {
+                totalCentroid.x += datum.pos.x;
+                totalCentroid.y += datum.pos.y;
+                datumInCluster++;
             }
         }
         PVector meanCentroid = new PVector((int) (totalCentroid.x / datumInCluster),
@@ -102,12 +97,6 @@ public class FindBallCenters extends PApplet {
         clusterList.set(i, meanCentroid);
     }
 
-    public void keyReleased() {
-        if (key == 'a'){
-            startClustering = true;
-            System.out.println("Started to Cluster");
-        }
-    }
     public static void main(String[] args) {
         PApplet.main("KMeans.FindBallCenters");
     }
