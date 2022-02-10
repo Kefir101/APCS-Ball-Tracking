@@ -13,6 +13,7 @@ public class FilterAndBestK implements PixelFilter {
     public static final int WHITE = 255, BLACK = 0;
     @Override
     public DImage processImage(DImage img) {
+        long start = System.currentTimeMillis();
         DImage newImg = threshold(blur(img));
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
@@ -83,6 +84,8 @@ public class FilterAndBestK implements PixelFilter {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+        long end = System.currentTimeMillis();
+        System.out.println("Code took " + (end - start)/1000 + " seconds to run.");
         return img;
     }
 
