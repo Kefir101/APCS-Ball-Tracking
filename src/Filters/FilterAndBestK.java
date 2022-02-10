@@ -24,39 +24,38 @@ public class FilterAndBestK implements PixelFilter {
             FindBallCenters findBalls = new FindBallCenters(newImg, K);
             balls = findBalls.findBallCenters();
             boolean tooClose = false;
-            boolean isLegit = true;
-            for (int b = 1; b < balls.size(); b++) {
-                PVector point = balls.get(b);
-                if(!checkCluster(point, newImg)) {
-                    balls.remove(b);
-                    b--;
-                    isLegit = false;
-                }
-            }
+            boolean subTractK = false;
             for (int b1 = 1; b1 < balls.size(); b1++) {
                 for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
                     PVector a = balls.get(b1);
                     PVector b = balls.get(b2);
                     if (b1 != balls.size()-1) {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 80) {
+                        if (dist < 100) {
                             tooClose = true;
-                            //K--;
+                            subTractK = true;
                         }
                     }
                 }
             }
-            if (!tooClose && isLegit) isSeparated = true;
-            /*if (tooClose) */K--;
-            if (K == 0) {
-                isSeparated = true;
-                K = 6;
-                FindBallCenters finalBalls = new FindBallCenters(newImg, K);
-                balls = finalBalls.findBallCenters();
-                break;
+            for (int b = 1; b < balls.size(); b++) {
+                PVector point = balls.get(b);
+                if(!checkCluster(point, newImg)) {
+                    balls.remove(b);
+                    b--;
+                    subTractK = true;
+                }
             }
-            System.out.println("iterated");
+            if (!tooClose) isSeparated = true;
+            if (subTractK) K--;
+            System.out.println(K);
         }while(!isSeparated && K > 0);
+
+        if (K == 0) {
+            K = 6;
+            FindBallCenters finalBalls = new FindBallCenters(newImg, K);
+            balls = finalBalls.findBallCenters();;
+        }
 
         int radius = 10;
         for (int b = 1; b < balls.size(); b++) {
@@ -79,7 +78,7 @@ public class FilterAndBestK implements PixelFilter {
         img.setColorChannels(out[0],out[1], out[2]);
         try {
             FileWriter writer = new FileWriter("center_positions.txt");
-            for (int i = 1; i <= K; i++) {
+            for (int i = 1; i < balls.size(); i++) {
                 PVector ball = balls.get(i);
                 writer.write(ball.x + ", " + ball.y + "\n");
             }
