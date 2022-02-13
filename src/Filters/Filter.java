@@ -47,7 +47,7 @@ public class Filter implements PixelFilter {
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
-                if (color.value > 40 && color.saturation > 40) out[r][c] = WHITE;
+                if (color.v > 40 && color.s > 40) out[r][c] = WHITE;
             }
         }
         DImage outImg = new DImage(width, height);

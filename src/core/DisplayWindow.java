@@ -1,5 +1,6 @@
 package core;
 
+import Filters.HSV;
 import Interfaces.Drawable;
 import Interfaces.Interactive;
 import Interfaces.PixelFilter;
@@ -223,10 +224,31 @@ public class DisplayWindow extends PApplet {
     private String colorStringAt(int mouseX, int mouseY) {
         loadPixels();
         int c = pixels[mouseY * width + mouseX];
-        float red = red(c);
-        float green = green(c);
-        float blue = blue(c);
-        return "r: " + red + " g: " + green + " b: " + blue;
+        double[]hsv = convertToHSV(red(c), green(c), blue(c));
+        return "h: " + (int)hsv[0] + " s: " + (int)hsv[1] + " v: " + (int)hsv[2];
+    }
+
+    private double[] convertToHSV(double red, double green, double blue) {
+        red = red/255.0;
+        green = green/255.0;
+        blue = blue/255.0;
+        double cMax = Math.max(red, Math.max(green, blue));
+        double cMin = Math.min(red, Math.min(green, blue));
+        double diff = cMax - cMin;
+        double h ;double s ;double v;
+        h= s = v = -1;
+        if(cMax == cMin) h = 0;
+        else if (cMax == red){
+            h = (60*((green-blue)/diff)+360) % 360;
+        } else if (cMax == green){
+            h = (60*((blue-red)/diff)+120) % 360;
+        } else if (cMax == blue){
+            h = (60*((red-green)/diff)+240) % 360;
+        }
+        if (cMax == 0) s = 0;
+        else s = diff/cMax * 100;
+        v = cMax * 100;
+        return new double[]{h, s, v};
     }
 
     private int getImageMouseX(DImage displayImage) {
