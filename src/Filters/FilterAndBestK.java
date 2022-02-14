@@ -77,7 +77,7 @@ public class FilterAndBestK implements PixelFilter {
             FileWriter writer = new FileWriter("center_positions.txt");
             for (int i = 1; i < balls.size(); i++) {
                 PVector ball = balls.get(i);
-                writer.write(ball.x + ", " + ball.y + "\n");
+                writer.write("Ball " + i + " " + ball.x + ", " + ball.y + ", ");
             }
             writer.close();
             System.out.println("Successfully wrote to the file.");
