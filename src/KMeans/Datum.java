@@ -7,13 +7,13 @@ import static processing.core.PApplet.hex;
 
 public class Datum {
     PVector pos;
-    int color, cluster = 0;
+    public int color, cluster = 0;
     boolean isData = false;
     public Datum(PVector pos_, int color_){
         this.pos = pos_;
         this.color = color_;
     }
-    float distanceToMouse(float mouseX, float mouseY){
+    public float distanceToMouse(float mouseX, float mouseY){
         return dist(mouseX, mouseY, pos.x, pos.y);
     }
     @Override

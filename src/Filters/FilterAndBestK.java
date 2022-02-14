@@ -1,6 +1,7 @@
 package Filters;
 
 import Interfaces.PixelFilter;
+import KMeans.Datum;
 import KMeans.FindBallCenters;
 import core.DImage;
 import processing.core.PVector;
@@ -28,20 +29,20 @@ public class FilterAndBestK implements PixelFilter {
                 for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
                     PVector a = balls.get(b1);
                     PVector b = balls.get(b2);
-                    if (b1 != balls.size()-1) {
+//                    if (b1 != balls.size()-1) {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
                         if (dist < 110) {
                             tooClose = true;
                         }
-                    }
+
                 }
             }
-            for (int b = 1; b < balls.size(); b++) {
-                PVector point = balls.get(b);
-                if(!checkCluster(point, newImg, findBallCenters.whitePoints)) {
+//            for (int b = 1; b < balls.size(); b++) {
+//                PVector point = balls.get(b);
+                if(!checkCluster(balls, newImg, findBallCenters.whitePoints)) {
                     notBall = true;
                 }
-            }
+           // }
             if(K == 0) break;
             if (tooClose || notBall){
                 keepGoing = true;
@@ -90,28 +91,7 @@ public class FilterAndBestK implements PixelFilter {
 
     private int findRadius(PVector center, DImage img){
         short[][]grid = img.getBWPixelGrid();
-        /*int radUP = 1; int radDOWN = 1; int radR = 1; int radL = 1;
-        int radiTotal = 0;
-        while(grid[(int)center.y-radUP][(int)center.x] == 255 && center.y - radUP >= 0){//up
-                radUP++;
-                radiTotal++;
-        }
-        while(grid[(int)center.y+radDOWN][(int)center.x] == 255 && radDOWN+center.y < grid.length){//down
-                radDOWN++;
-                radiTotal++;
-        }
-        while(grid[(int)center.y][(int)center.x+radR] == 255 && radR + center.x < grid[0].length){//right
-                radR++;
-                radiTotal++;
-        }
-        while(grid[(int)center.y][(int)center.x-radL] == 255 && center.x- radL >= 0){//left
-                radL++;
-                radiTotal++;
-        }
-        double averageRad = radiTotal/4;
-        if (averageRad-)
-        return radiTotal/4;
-         */
+
         int radius = 1;
         if(isInBounds(img.getHeight(), img.getWidth(), (int) center.y-radius, (int) center.x)){
             while(center.y - radius >= 0 && grid[(int)center.y-radius][(int)center.x] == 255){ //up
@@ -120,29 +100,27 @@ public class FilterAndBestK implements PixelFilter {
         }
         return radius;
     }
-    private boolean checkCluster(PVector point, DImage img, ArrayList<KMeans.Datum> whitePoints) { //check for circleness and size
-        short[][] BWgrid = img.getBWPixelGrid();
-        int x = (int) point.x;
-        int y = (int) point.y;
+    private boolean checkCluster(ArrayList<PVector> balls, DImage img, ArrayList<KMeans.Datum> whitePoints) { //check for circleness and size
         double totalDist = 0;
         int numPoints = 0;
-        int radius = findRadius(point, img); // find upper edge of cluster and return false if it is too big or too small
-        if (radius < (img.getWidth() / 40.0) || radius > (img.getWidth() / 6.0)) return false;
         /** find total distances of all the points in the cluster**/
-        for (int i = -radius; i <= radius; i++) {
-            for (int j = -radius; j <= radius; j++) {
-                int Y = y + i;
-                int X = x + j;
-                if (isInBounds(img.getHeight(), img.getWidth(), Y, X))
-                    if (BWgrid[Y][X] == 255) {
-                        numPoints++;
-                        double dist = Math.sqrt(((y - Y) * (y - Y) + (x - X) * (x - X)));
-                        totalDist += dist;
-                    }
+        for (int i = 1; i < balls.size() ; i++) {
+            PVector center = balls.get(i);
+            int x = (int) center.x;
+            int y = (int) center.y;
+            for (Datum point : whitePoints) {
+                if (point.cluster == i) {
+                    numPoints++;
+                    double newdist = point.distanceToMouse(x, y);
+                    totalDist += newdist;
+                }
             }
+            double average = totalDist/numPoints;
+            double rad = average * 3 / 2;
+           if (rad < (img.getWidth() / 20.0) || rad> (img.getWidth() / 6.0)) return false;
         }
+        return true;
         /**if the actual average distance-supposed average distance is less than 30 return true**/
-        return Math.abs((totalDist / numPoints) - (radius * 2 / 3.0)) < 30;
     }
     public DImage threshold(DImage img) {
         int height = img.getRedChannel().length;
