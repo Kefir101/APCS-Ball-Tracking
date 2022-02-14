@@ -9,7 +9,7 @@ import java.util.*;
 public class FindBallCenters {
     int K;
     ArrayList<PVector> clusterList;
-    ArrayList<Datum> whitePoints;
+    public ArrayList<Datum> whitePoints;
     int iterations;
     public FindBallCenters(DImage img, int k){
         K = k;

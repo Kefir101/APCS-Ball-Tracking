@@ -16,12 +16,14 @@ public class FilterAndBestK implements PixelFilter {
         DImage newImg = threshold(blur(img));
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
+        FindBallCenters findBallCenters;
         ArrayList<PVector> balls;
         boolean keepGoing;
         do{
             keepGoing = false;
             boolean tooClose = false, notBall = false;
-            balls = new FindBallCenters(newImg, K).findBallCenters();
+            findBallCenters = new FindBallCenters(newImg, K);
+            balls = findBallCenters.findBallCenters();
             for (int b1 = 1; b1 < balls.size(); b1++) {
                 for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
                     PVector a = balls.get(b1);
@@ -36,7 +38,7 @@ public class FilterAndBestK implements PixelFilter {
             }
             for (int b = 1; b < balls.size(); b++) {
                 PVector point = balls.get(b);
-                if(!checkCluster(point, newImg)) {
+                if(!checkCluster(point, newImg, findBallCenters.whitePoints)) {
                     notBall = true;
                 }
             }
@@ -111,12 +113,14 @@ public class FilterAndBestK implements PixelFilter {
         return radiTotal/4;
          */
         int radius = 1;
-        while(grid[(int)center.y-radius][(int)center.x] == 255 && center.y - radius >= 0){//up
-            radius++;
+        if(isInBounds(img.getHeight(), img.getWidth(), (int) center.y-radius, (int) center.x)){
+            while(center.y - radius >= 0 && grid[(int)center.y-radius][(int)center.x] == 255){ //up
+                radius++;
+            }
         }
         return radius;
     }
-    private boolean checkCluster(PVector point, DImage img) { //check for circleness and size
+    private boolean checkCluster(PVector point, DImage img, ArrayList<KMeans.Datum> whitePoints) { //check for circleness and size
         short[][] BWgrid = img.getBWPixelGrid();
         int x = (int) point.x;
         int y = (int) point.y;
@@ -149,9 +153,9 @@ public class FilterAndBestK implements PixelFilter {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
                 double H = color.h, S = color.s, V = color.v;
-                boolean red = H > 340 && S > 70 && V > 70;
-                boolean orange = H < 16 && S > 55 && V > 65;
-                boolean yellow = H > 20 && H < 55 && S > 20 && V > 70;
+                boolean red = (H > 340 || H < 16) && S > 70 && V > 70;
+                boolean orange = H > 15 && H < 35 && S > 55 && V > 65;
+                boolean yellow = H > 35 && H < 55 && S > 20 && V > 70;
                 boolean green = H > 95 && H < 190 && S > 30 && V > 40;
                 boolean blue = H > 200 && H < 230 && S > 40 && V > 40;
                 boolean purple = H > 250 && H < 310 && S > 45 && V > 35;
