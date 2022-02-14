@@ -20,4 +20,7 @@ public class Datum {
     public String toString() {
         return (hex(this.color));
     }
+    public PVector getPos() {
+        return pos;
+    }
 }

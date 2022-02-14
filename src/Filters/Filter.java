@@ -124,7 +124,7 @@ public class Filter implements PixelFilter {
 
     private void writeToFile(ArrayList<PVector> balls){
         try {
-            FileWriter writer = new FileWriter("center_positions.txt");
+            FileWriter writer = new FileWriter("ballCenters.txt");
             for (int i = 1; i < balls.size(); i++) {
                 PVector ball = balls.get(i);
                 writer.write(ball.x + ", " + ball.y + "\n");
