@@ -83,8 +83,6 @@ public class FilterAndBestK implements PixelFilter {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-
-
         return img;
     }
 
@@ -150,15 +148,14 @@ public class FilterAndBestK implements PixelFilter {
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
-                boolean red = color.h < 16  && color.s > 40 && color.v > 70;
-                boolean yellow = color.h > 20 && color.h < 50 && color.v > 70&& color.s > 20;
-                boolean green = color.h > 80 && color.h < 140 && color.s > 20 && color.v > 40;
-                boolean blue = color.h > 200 && color. h< 230 && color.s > 40 && color.v > 20;
-
-
-                if (red || yellow || green || blue) {
-                    out[r][c] = WHITE;
-                }
+                double H = color.h, S = color.s, V = color.v;
+                boolean red = H > 340 && S > 70 && V > 70;
+                boolean orange = H < 16 && S > 55 && V > 65;
+                boolean yellow = H > 20 && H < 55 && S > 20 && V > 70;
+                boolean green = H > 95 && H < 190 && S > 30 && V > 40;
+                boolean blue = H > 200 && H < 230 && S > 40 && V > 40;
+                boolean purple = H > 250 && H < 310 && S > 45 && V > 35;
+                if (red || orange || yellow || green || blue || purple) out[r][c] = WHITE;
             }
         }
         DImage outImg = new DImage(width, height);
