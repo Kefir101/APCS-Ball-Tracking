@@ -11,9 +11,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class FilterAndBestK implements PixelFilter {
-    public static final int WHITE = 255, BLACK = 0;
+    public static final int WHITE = 255, BLACK = 0, kernelSize = 9;
     @Override
     public DImage processImage(DImage img) {
         DImage BWImg = threshold(blur(img));
@@ -22,37 +23,41 @@ public class FilterAndBestK implements PixelFilter {
         FindBallCenters findBallCenters;
         ArrayList<PVector> balls;
         boolean keepGoing;
+        //find best K
         do{
             keepGoing = false;
             boolean tooClose = false, notBall = false;
             findBallCenters = new FindBallCenters(BWImg, K);
             balls = findBallCenters.findBallCenters();
+            //check if any two clusters (centers) are two close
             for (int b1 = 1; b1 < balls.size(); b1++) {
                 for (int b2 = b1 + 1; b2 < balls.size(); b2++) {
                     PVector a = balls.get(b1);
                     PVector b = balls.get(b2);
-//                    if (b1 != balls.size()-1) {
-                        double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 110) {
-                            tooClose = true;
-                        }
-
+                    double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+                    if (dist < img.getHeight()/7.0) {
+                        tooClose = true;
+                        break;
+                    }
                 }
             }
-//            for (int b = 1; b < balls.size(); b++) {
-//                PVector point = balls.get(b);
-                if(!checkCluster(balls, BWImg, findBallCenters.whitePoints)) {
+            //check if any cluster is not a ball
+            for (int i = 0; i < balls.size(); i++) {
+                if(!clusterIsABall(i, balls.get(i), BWImg, findBallCenters.whitePoints)) {
                     notBall = true;
+                    break;
                 }
-           // }
-            if(K == 0) break;
-            if (tooClose || notBall){
+            }
+            //keep decreasing K while K is more than 0 AND either balls are too close or not a ball
+            if ((tooClose || notBall) && K > 0){
                 keepGoing = true;
                 K--;
                 System.out.println("K = " + (K+1) + " -> K = " + K);
             }
         }while(keepGoing);
         int radius = 10;
+
+        //draw black centers on the image
         for (int b = 1; b < balls.size(); b++) {
             PVector point = balls.get(b);
             int x = (int) point.x;
@@ -74,23 +79,23 @@ public class FilterAndBestK implements PixelFilter {
         writeBallCentersToFile(balls);
         return img;
     }
-    private boolean checkCluster(ArrayList<PVector> balls, DImage img, ArrayList<KMeans.Datum> whitePoints) { //check for circleness and size
+    private boolean clusterIsABall(int i, PVector ball, DImage img, ArrayList<KMeans.Datum> whitePoints) { //check for circleness and size
         double totalDist = 0;
         int numPoints = 0;
-        for (int i = 1; i < balls.size() ; i++) {
-            PVector center = balls.get(i);
-            for (Datum point : whitePoints) {
-                if (point.cluster == i) {
-                    totalDist += Math.sqrt((center.x - point.getPos().x) * (center.x - point.getPos().x) +
-                            (center.y - point.getPos().y) * (center.y - point.getPos().y));
-                    numPoints++;
-                }
+        //find average distance from the center of the cluster
+        for (Datum point : whitePoints) {
+            if (point.cluster == i) {
+                totalDist += Math.sqrt((ball.x - point.getPos().x) * (ball.x - point.getPos().x) +
+                        (ball.y - point.getPos().y) * (ball.y - point.getPos().y));
+                numPoints++;
             }
-            double averageRadius = totalDist/numPoints;
-            double radius = averageRadius * 3 / 2;
-            System.out.println("X: " + center.x + ", Y: " + center.y + ", R: " + radius);
-            if (radius < (img.getWidth() / 12.0) || radius > (img.getWidth() / 6.0)) return false;
         }
+        double averageRadius = totalDist/numPoints;
+        //since average distance from the center of a circle is A = 2R/3, work backwards to get R = A * 3/2
+        double radius = averageRadius * 3 / 2;
+        System.out.println("X: " + ball.x + ", Y: " + ball.y + ", R: " + radius);
+        //if radius is too small relative to the size of the image or too large, it is not a ball
+        if (radius < (img.getWidth() / 12.0) || radius > (img.getWidth() / 4.0)) return false;
         return true;
     }
     public DImage threshold(DImage img) {
@@ -98,6 +103,7 @@ public class FilterAndBestK implements PixelFilter {
         int width = img.getRedChannel()[0].length;
         HSV[][] pixels = RGBToHSV(img);
         short[][] out = new short[height][width];
+        //loop through every pixel in the image, threshold by HSV for every color in ROYGBP
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
@@ -126,14 +132,17 @@ public class FilterAndBestK implements PixelFilter {
         }
         return out;
     }
+    private boolean isInBounds(int height, int width, int r, int c){
+        if (r < 0 || c < 0 || r >= height || c >= width) return false;
+        return true;
+    }
+
 
     public DImage blur(DImage in) {
         int height = in.getRedChannel().length;
         int width = in.getRedChannel()[0].length;
         short[][][] inColors = {in.getRedChannel(), in.getGreenChannel(), in.getBlueChannel()};
         short[][][] outColors = new short[3][height][width];
-//        int kernelSize = Integer.parseInt(JOptionPane.showInputDialog(null, "Kernel Size (odd only): "));
-        int kernelSize = 9;
         double[][] kernel = new double[kernelSize][kernelSize];
         createBoxBlur(kernel);
         double weightsSum = calculateSum(kernel);
@@ -141,9 +150,9 @@ public class FilterAndBestK implements PixelFilter {
             for (int c = 0; c < width; c++) {
                 if (!(r < kernelSize / 2 || c < kernelSize / 2
                         || r >= height - kernelSize / 2 || c >= width - kernelSize / 2)) {
-                    outColors[0][r][c] = (short) computeOutputValue(r, c, inColors[0], kernel, weightsSum);
-                    outColors[1][r][c] = (short) computeOutputValue(r, c, inColors[1], kernel, weightsSum);
-                    outColors[2][r][c] = (short) computeOutputValue(r, c, inColors[2], kernel, weightsSum);
+                    outColors[0][r][c] = applyKernelToPoint(r, c, inColors[0], kernel, weightsSum);
+                    outColors[1][r][c] = applyKernelToPoint(r, c, inColors[1], kernel, weightsSum);
+                    outColors[2][r][c] = applyKernelToPoint(r, c, inColors[2], kernel, weightsSum);
                 }
             }
         }
@@ -151,18 +160,7 @@ public class FilterAndBestK implements PixelFilter {
         out.setColorChannels(outColors[0], outColors[1], outColors[2]);
         return out;
     }
-    private void createBoxBlur(double[][] kernel) {
-        for (int r = 0; r < kernel.length; r++) {
-            for (int c = 0; c < kernel.length; c++) {
-                kernel[r][c] = 1;
-            }
-        }
-    }
-    private boolean isInBounds(int height, int width, int r, int c){
-        if (r < 0 || c < 0 || r >= height || c >= width) return false;
-        return true;
-    }
-    private double computeOutputValue(int r, int c, short[][] pixels, double[][] kernel, double kernelSum) {
+    private short applyKernelToPoint(int r, int c, short[][] pixels, double[][] kernel, double kernelSum) {
         double output = 0;
         int half = kernel.length / 2;
         for (int i = -half; i <= half; i++) {
@@ -173,7 +171,7 @@ public class FilterAndBestK implements PixelFilter {
         if (kernelSum != 0) output = output / kernelSum;
         if (output < BLACK) output = BLACK;
         if (output > WHITE) output = WHITE;
-        return output;
+        return (short) output;
     }
     private double calculateSum(double[][] kernel) {
         double total = 0;
@@ -183,6 +181,9 @@ public class FilterAndBestK implements PixelFilter {
             }
         }
         return total;
+    }
+    private void createBoxBlur(double[][] kernel) {
+        for (double[] row : kernel) Arrays.fill(row, 1);
     }
 
     private void writeBallCentersToFile(ArrayList<PVector> balls){
