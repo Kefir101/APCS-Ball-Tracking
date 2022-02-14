@@ -13,7 +13,6 @@ public class FilterAndBestK implements PixelFilter {
     public static final int WHITE = 255, BLACK = 0;
     @Override
     public DImage processImage(DImage img) {
-        long start = System.currentTimeMillis();
         DImage newImg = threshold(blur(img));
         short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
@@ -38,7 +37,7 @@ public class FilterAndBestK implements PixelFilter {
             for (int b = 1; b < balls.size(); b++) {
                 PVector point = balls.get(b);
                 if(!checkCluster(point, newImg)) {
-                   notBall = true;
+                    notBall = true;
                 }
             }
             if(K == 0) break;
@@ -84,8 +83,8 @@ public class FilterAndBestK implements PixelFilter {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-        long end = System.currentTimeMillis();
-        System.out.println("Code took " + (end - start)/1000 + " seconds to run.");
+
+
         return img;
     }
 
@@ -111,9 +110,7 @@ public class FilterAndBestK implements PixelFilter {
         }
         double averageRad = radiTotal/4;
         if (averageRad-)
-
         return radiTotal/4;
-
          */
         int radius = 1;
         while(grid[(int)center.y-radius][(int)center.x] == 255 && center.y - radius >= 0){//up
@@ -153,7 +150,13 @@ public class FilterAndBestK implements PixelFilter {
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
-                if (color.value > 40 && color.saturation > 40) {
+                boolean red = color.h < 16  && color.s > 40 && color.v > 70;
+                boolean yellow = color.h > 20 && color.h < 50 && color.v > 70&& color.s > 20;
+                boolean green = color.h > 80 && color.h < 140 && color.s > 20 && color.v > 40;
+                boolean blue = color.h > 200 && color. h< 230 && color.s > 40 && color.v > 20;
+
+
+                if (red || yellow || green || blue) {
                     out[r][c] = WHITE;
                 }
             }
@@ -232,4 +235,3 @@ public class FilterAndBestK implements PixelFilter {
         return total;
     }
 }
-
