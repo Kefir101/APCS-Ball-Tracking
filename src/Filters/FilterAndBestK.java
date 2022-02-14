@@ -6,8 +6,10 @@ import KMeans.FindBallCenters;
 import core.DImage;
 import processing.core.PVector;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class FilterAndBestK implements PixelFilter {
@@ -74,19 +76,8 @@ public class FilterAndBestK implements PixelFilter {
         }
 
         img.setColorChannels(out[0],out[1], out[2]);
-        try {
-            FileWriter writer = new FileWriter("center_positions.txt");
-            for (int i = 1; i < balls.size(); i++) {
-                PVector ball = balls.get(i);
-                writer.write(ball.x + ", " + ball.y + "\n");
-            }
-            writer.close();
-            System.out.println("Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-        return img;
+        writeBallCentersToFile(balls);
+        return newImg;
     }
 
     private int findRadius(PVector center, DImage img){
@@ -212,5 +203,21 @@ public class FilterAndBestK implements PixelFilter {
             }
         }
         return total;
+    }
+
+    private void writeBallCentersToFile(ArrayList<PVector> balls){
+        try(FileWriter fw = new FileWriter("ballCenters.txt", true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter writer = new PrintWriter(bw))
+        {
+            for (int i = 1; i < balls.size(); i++) {
+                PVector ball = balls.get(i);
+                writer.write("Ball" + i + " X: " + ball.x + ", Y: " + ball.y + "; ");
+            }
+            writer.write("\n");
+            System.out.println("Center positions written to ballCenters.txt");
+        } catch (IOException e) {
+            System.out.println("Error in writing centers to ballCenters.txt");
+        }
     }
 }
