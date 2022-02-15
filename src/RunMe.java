@@ -9,7 +9,7 @@ public class RunMe {
             System.out.println(file.delete() ? "File deleted" : "Error deleting file");
         }
         // --== Load an image to filter ==--
-        DisplayWindow.showFor("images/redblueyellowgreen.jpeg", 1300, 700);
+        DisplayWindow.showFor("images/balls.jpg", 1000, 900);
         // --== Determine your input interactively with menus ==--
 //        DisplayWindow.getInputInteractively(800,600);
     }

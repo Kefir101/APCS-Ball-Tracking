@@ -38,6 +38,7 @@ public class FindBallCenters {
 
     //decomposed/helper methods
     public void initializeData(short[][] pixels){
+        //go through all the pixels, and if the point is white add it to the arraylist
         for (int i = 0; i < pixels.length; i++) {
             for (int j = 0; j < pixels[0].length; j++) {
                 if(pixels[i][j] == 255) {
@@ -51,10 +52,14 @@ public class FindBallCenters {
         ArrayList<PVector> currentDistList = new ArrayList<>(Collections.nCopies(K+1, new PVector(0, 0)));
         ArrayList<PVector> maxDistList = null;
         double minMinDist = Double.MIN_VALUE;
+        //for X iterations (X being 100), try and find the maximum (minimum distance) between the K clusters
+        //meaning: where all the clusters are farthest away
         for (int i = 0; i < 100; i++) {
+            //shuffle the points and choose the first K ones
             double minDist = Double.MAX_VALUE;
             Collections.shuffle(tempWhitePoints);
             for (int j = 1; j <= K; j++) currentDistList.set(j, tempWhitePoints.get(j-1).pos);
+            //find the minimum distance between all those clusters/points
             for (int j = 1; j <= K; j++) {
                 PVector a = currentDistList.get(j);
                 for (int k = j+1; k <= K; k++) {
@@ -71,6 +76,7 @@ public class FindBallCenters {
         return maxDistList;
     }
     public void closestClusterToPoint(Datum datum){
+        //go through all the clusters, keep track of the minimum distance and cluster
         int cluster = 1;
         double minDist = Double.MAX_VALUE;
         for (int i = 1; i < clusterList.size(); i++) {
@@ -86,6 +92,7 @@ public class FindBallCenters {
     public void recalculateCentroids(int i){
         PVector totalCentroid = new PVector();
         int datumInCluster = 0;
+        //find the total and then mean of position all the points from each cluster
         for(Datum datum : whitePoints){
             if (datum.cluster == i) {
                 totalCentroid.x += datum.pos.x;
@@ -95,6 +102,7 @@ public class FindBallCenters {
         }
         PVector meanCentroid = new PVector((int) (totalCentroid.x / datumInCluster),
                 (int) (totalCentroid.y / datumInCluster));
+        //set that cluster to the mean
         clusterList.set(i, meanCentroid);
     }
 
