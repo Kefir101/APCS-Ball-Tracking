@@ -24,7 +24,6 @@ public class FilterAndBestK implements PixelFilter {
         ArrayList<PVector> balls;
         boolean keepGoing;
         double proximity = Math.sqrt(img.getWidth()*img.getWidth() + img.getHeight()* img.getHeight()) / 8;
-
         //find best K
         do{
             keepGoing = false;
