@@ -346,10 +346,10 @@ public class DisplayWindow extends PApplet {
     }
 
     private PixelFilter loadNewFilter() {
-        String name = JOptionPane.showInputDialog("Type the name of your processImage class (without the .java)");
+//        String name = JOptionPane.showInputDialog("Type the name of your processImage class (without the .java)");
         PixelFilter f = null;
         try {
-            Class c = Class.forName("Filters." + name);
+            Class c = Class.forName("Filters." + "FilterAndBestK");
             f = (PixelFilter) c.newInstance();
         } catch (Exception e) {
             System.err.println("Something went wrong when instantiating your class!  (running its constructor). " +
@@ -357,7 +357,6 @@ public class DisplayWindow extends PApplet {
                     "no inputs!");
             System.err.println(e.getMessage());
         }
-
         return f;
     }
 

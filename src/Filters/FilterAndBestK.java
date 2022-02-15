@@ -93,9 +93,9 @@ public class FilterAndBestK implements PixelFilter {
         double averageRadius = totalDist/numPoints;
         //since average distance from the center of a circle is A = 2R/3, work backwards to get R = A * 3/2
         double radius = averageRadius * 3 / 2;
-        System.out.println("X: " + ball.x + ", Y: " + ball.y + ", R: " + radius);
+//        System.out.println("X: " + ball.x + ", Y: " + ball.y + ", R: " + radius);
         //if radius is too small relative to the size of the image or too large, it is not a ball
-        if (radius < (img.getWidth() / 12.0) || radius > (img.getWidth() / 4.0)) return false;
+        if (radius < (img.getWidth() / 25.0) || radius > (img.getWidth() / 3.0)) return false;
         return true;
     }
     public DImage threshold(DImage img) {
@@ -112,7 +112,7 @@ public class FilterAndBestK implements PixelFilter {
                 boolean orange = H > 15 && H < 35 && S > 55 && V > 65;
                 boolean yellow = H > 35 && H < 55 && S > 20 && V > 70;
                 boolean green = H > 95 && H < 190 && S > 30 && V > 40;
-                boolean blue = H > 200 && H < 230 && S > 40 && V > 40;
+                boolean blue = H > 195 && H < 230 && S > 40 && V > 40;
                 boolean purple = H > 250 && H < 310 && S > 45 && V > 35;
                 if (red || orange || yellow || green || blue || purple) out[r][c] = WHITE;
             }
