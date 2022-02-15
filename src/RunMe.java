@@ -6,7 +6,7 @@ public class RunMe {
     public static void main(String[] args) {
         File file = new File("ballCenters.txt");
         if(file.exists()) {
-            System.out.println(file.delete() ? "File deleted" : "Error deleting file");
+            System.out.println(file.delete() ? "ballCenters.txt deleted" : "Error deleting ballCenters.txt");
         }
         // --== Load an image to filter ==--
         DisplayWindow.showFor("images/balls.jpg", 1000, 900);

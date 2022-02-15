@@ -23,6 +23,8 @@ public class FilterAndBestK implements PixelFilter {
         FindBallCenters findBallCenters;
         ArrayList<PVector> balls;
         boolean keepGoing;
+        double proximity = Math.sqrt(img.getWidth()*img.getWidth() + img.getHeight()* img.getHeight()) / 8;
+
         //find best K
         do{
             keepGoing = false;
@@ -35,7 +37,7 @@ public class FilterAndBestK implements PixelFilter {
                     PVector a = balls.get(b1);
                     PVector b = balls.get(b2);
                     double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                    if (dist < img.getHeight()/7.0) {
+                    if (dist < proximity) {
                         tooClose = true;
                         break;
                     }
