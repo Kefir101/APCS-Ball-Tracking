@@ -22,6 +22,8 @@ public class FilterAndBestK implements PixelFilter {
         FindBallCenters findBallCenters;
         ArrayList<PVector> balls;
         boolean keepGoing;
+        double proximity = Math.sqrt(img.getWidth()*img.getWidth() + img.getHeight()* img.getHeight()) / 8;
+        System.out.println(proximity);
         do{
             keepGoing = false;
             boolean tooClose = false, notBall = false;
@@ -33,7 +35,7 @@ public class FilterAndBestK implements PixelFilter {
                     PVector b = balls.get(b2);
 //                    if (b1 != balls.size()-1) {
                         double dist = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-                        if (dist < 110) {
+                        if (dist < proximity) {
                             tooClose = true;
                         }
 
@@ -87,9 +89,12 @@ public class FilterAndBestK implements PixelFilter {
                 }
             }
             double averageRadius = totalDist/numPoints;
-            double radius = averageRadius * 3 / 2;
+            totalDist = 0;
+            numPoints = 0;
+            double radius = averageRadius * 3.2 / 2;
             System.out.println("X: " + center.x + ", Y: " + center.y + ", R: " + radius);
-            if (radius < (img.getWidth() / 12.0) || radius > (img.getWidth() / 6.0)) return false;
+            System.out.println("width" + img.getWidth());
+            if (radius < (img.getWidth() / 9.0) || radius > (img.getWidth() / 4.0)) return false;
         }
         return true;
     }
