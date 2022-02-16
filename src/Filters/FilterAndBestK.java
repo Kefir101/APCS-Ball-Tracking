@@ -109,7 +109,7 @@ public class FilterAndBestK implements PixelFilter {
             for (int c = 0; c < width; c++) {
                 HSV color = pixels[r][c];
                 double H = color.h, S = color.s, V = color.v;
-                boolean red = (H > 340 || H < 16) && S > 70 && V > 70;
+                boolean red = (H > 350 || H < 16) && S > 45 && V > 60;
                 boolean orange = H > 15 && H < 35 && S > 55 && V > 65;
                 boolean yellow = H > 35 && H < 55 && S > 20 && V > 70;
                 boolean green = H > 95 && H < 190 && S > 30 && V > 40;
