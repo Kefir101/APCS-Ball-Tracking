@@ -9,7 +9,12 @@ public class RunMe {
             System.out.println(file.delete() ? "ballCenters.txt deleted" : "Error deleting ballCenters.txt");
         }
         // --== Load an image to filter ==--
-        DisplayWindow.showFor("images/balls.jpg", 1000, 900);
+//        DisplayWindow.showFor("images/red.jpg", 1000, 900);
+//        DisplayWindow.showFor("images/reds.jpg", 1000, 900);
+//        DisplayWindow.showFor("images/allcolors.jpg", 1300, 900);
+//        DisplayWindow.showFor("images/four.jpg", 1000, 1200);
+//        DisplayWindow.showFor("images/five.jpg", 800, 1000);
+//        DisplayWindow.showFor("images/realballs.jpg", 1300, 900);
         // --== Determine your input interactively with menus ==--
 //        DisplayWindow.getInputInteractively(800,600);
     }

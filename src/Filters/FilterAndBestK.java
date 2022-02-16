@@ -18,7 +18,7 @@ public class FilterAndBestK implements PixelFilter {
     @Override
     public DImage processImage(DImage img) {
         DImage BWImg = threshold(blur(img));
-        short[][][] out = {img.getRedChannel(), img.getGreenChannel(), img.getBlueChannel()};
+        short[][][] out = {img.getRedChannel    (), img.getGreenChannel(), img.getBlueChannel()};
         int K = 6;
         FindBallCenters findBallCenters;
         ArrayList<PVector> balls;
